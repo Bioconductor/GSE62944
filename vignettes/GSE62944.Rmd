@@ -1,0 +1,75 @@
+---
+title: "Raw TCGA data using Bioconductor's ExperimentHub"
+author: "Sonali Arora"
+output: html_document
+---
+
+# DE analysis with Raw TCGA data using Bioconductor's ExperimentHub and DESeq2
+
+TCGA re-processed RNA-Seq data from 9264 Tumor Samples and 741 normal samples
+across 24 cancer types and made it available via [GSE62944](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE62944) from GEO.
+This data is also available as an ExpressionSet from ExperimentHub and
+can be used for Differential Expression Analysis.
+
+In the below example, we show how one can download this dataset from 
+ExperimentHub.
+
+```{r get-tcga}
+library(ExperimentHub)
+ah = ExperimentHub()
+query(ah , "GSE62944")
+```
+One can then extract the data for this using
+```{r download-tcga}
+(tcga_data <- ah[["AH28855"]])
+```
+The different cancer types can be accessed using -
+
+```{r cancer-types}
+ head(phenoData(tcga_data)$CancerType)
+```
+Above we show only the top 6 Cancer subtypes.
+
+##  Case Study 
+
+We are interested in identifying the IDH1 mutant and IDH1 wild type
+samples from TCGA's Low Grade Glioma Samples and then conducting a 
+differential expression analysis using DESeq2
+
+```{r lgg}
+# subset the expression Set to contain only samples from LGG.
+lgg_data <- tcga_data[, which(phenoData(tcga_data)$CancerType=="LGG")]
+
+# extract the IDHI mutant samples
+mut_idx <- which(phenoData(lgg_data)$idh1_mutation_found=="YES")
+mut_data <- exprs(lgg_data)[, mut_idx]
+
+# extract the IDH1 WT samples
+wt_idx <- which(phenoData(lgg_data)$idh1_mutation_found=="NO")
+wt_data <- exprs(lgg_data)[, wt_idx]
+
+# make a countTable.
+countData <- cbind(mut_data, wt_data)
+
+# for DE analysis with DESeq2 we need a sampleTable
+samples= c(colnames(mut_data), colnames(wt_data))
+group =c(rep("mut",length(mut_idx)), rep("wt", length(wt_idx)))
+coldata <- cbind(samples, group)
+colnames(coldata) <- c("sampleName", "Group")
+coldata[,"Group"] <- factor(coldata[,"Group"], c("wt","mut"))
+
+# Now we can run DE analysis
+library(DESeq2)
+ddsMat <- DESeqDataSetFromMatrix(countData = countData,
+                                 colData = DataFrame(coldata),
+                                 design = ~ Group)
+
+dds <- ddsMat
+dds <- dds[ rowSums(counts(dds)) > 1, ]
+dds <- DESeq(dds)
+res <- results(dds) 
+summary(res)
+
+```
+
+For a detailed RNASeq analysis see [Mike Love's RNASeq workflow](http://www.bioconductor.org/help/workflows/rnaseqGene/)
