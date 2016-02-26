@@ -25,11 +25,13 @@
 }
 
 \examples{
-## library(ExperimentHub)
-## hub <- ExperimentHub()
-## x <- query(hub, "GSE62944")
-## x
-## x[[1]]
-}
+library(ExperimentHub)
+hub <- ExperimentHub()
+x <- query(hub, "GSE62944")
+x
+\dontrun{
+## download resource
+x[[1]]
+}}
 
 \keyword{utilities}

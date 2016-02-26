@@ -1,8 +1,14 @@
 ---
 title: "Raw TCGA data using Bioconductor's ExperimentHub"
 author: "Sonali Arora"
-output: html_document
+date: "`r doc_date()`"
+vignette: >
+  %\VignetteIndexEntry{Raw TCGA data using Bioconductor's ExperimentHub}
+  %\VignetteEngine{knitr::rmarkdown}
+output: 
+  BiocStyle::html_document
 ---
+
 
 # DE analysis with Raw TCGA data using Bioconductor's ExperimentHub and DESeq2
 
@@ -16,12 +22,12 @@ ExperimentHub.
 
 ```{r get-tcga}
 library(ExperimentHub)
-ah = ExperimentHub()
-query(ah , "GSE62944")
+eh = ExperimentHub()
+query(eh , "GSE62944")
 ```
 One can then extract the data for this using
 ```{r download-tcga}
-(tcga_data <- ah[["AH28855"]])
+tcga_data <- eh[["EH1"]]
 ```
 The different cancer types can be accessed using -
 
