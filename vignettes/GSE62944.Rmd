@@ -79,3 +79,10 @@ summary(res)
 ```
 
 For a detailed RNASeq analysis see [Mike Love's RNASeq workflow](http://www.bioconductor.org/help/workflows/rnaseqGene/)
+
+
+# sessionInfo()
+
+```{r sessionInfo}
+sessionInfo()
+```
