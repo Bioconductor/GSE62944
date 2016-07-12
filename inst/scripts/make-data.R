@@ -87,3 +87,77 @@ makeExperimentHubMetadata <- function(Title, Description,
                Location_Prefix = "http://s3.amazonaws.com/experimenthub/",
                Tags, Recipe = NULL, DispatchClass = NULL)
 }
+
+## make two new SE objects, one for tumor and one for normal samples
+
+## step 0 - download the data from TCGA.
+library("GEOquery")
+library("Biobase")
+suppl <- GEOquery::getGEOSuppFiles("GSE62944")
+
+## gunzip the files - done only once. 
+setwd("GSE62944")
+untar("GSE62944_RAW.tar")
+system("gunzip GSM1536837_06_01_15_TCGA_24.tumor_Rsubread_FeatureCounts.txt.gz")    
+system("gunzip GSM1697009_06_01_15_TCGA_24.normal_Rsubread_FeatureCounts.txt.gz" )       
+
+
+## step 1 - get the clinical variable data for all samples. 
+library(SummarizedExperiment)
+clinvar <- 
+   read.delim("GSE62944_06_01_15_TCGA_24_548_Clinical_Variables_9264_Samples.txt.gz")
+clinvar <- t(clinvar)   # rows contain TCGA patients
+colnames(clinvar) <- clinvar[1,] # add variable names
+clinvar <- clinvar[-c(1:3),] # remove duplicate header 
+clinvar <- as.data.frame(clinvar)
+rownames(clinvar) <- gsub("\\.","-",rownames(clinvar))  
+
+## step 2 - read in cancer samples
+CancerType <-
+   read.delim("GSE62944_06_01_15_TCGA_24_CancerType_Samples.txt.gz",
+                 header=FALSE, colClasses=c("character", "factor"),
+                 col.names=c("sample", "type"))
+idx <- match(rownames(clinvar), CancerType$sample)
+clinvar$CancerType <- CancerType$type[idx]
+
+cancer_raw <- 
+    read.table("GSM1536837_06_01_15_TCGA_24.tumor_Rsubread_FeatureCounts.txt", 
+                 header=TRUE)
+colnames(cancer_raw) = gsub("\\.","-",colnames(cancer_raw))
+idx = match(rownames(clinvar), colnames(cancer_raw))
+cancer_raw = cancer_raw[,idx]
+
+if(!identical(colnames(cancer_raw), CancerType[,1]))
+   stop("Samples are not in correct order!")
+ 
+if(!identical(colnames(cancer_raw), rownames(clinvar)))
+   stop("Samples are not in correct order!")
+   
+## step 3 - make the se for the tumor samples
+
+se_tumor <- SummarizedExperiment(assays=data.matrix(cancer_raw), 
+   colData = S4Vectors::DataFrame(clinvar)) 
+save(se_tumor
+   file="GSE62944_GSM1536837_TCGA_24.tumor_Rsubread_FeatureCounts.SE.Rda")
+
+## step 4 -read in normal samples
+NormalCancerType <-
+   read.delim("GSE62944_06_01_15_TCGA_24_Normal_CancerType_Samples.txt.gz",
+                 header=FALSE, colClasses=c("character", "factor"),
+                 col.names=c("sample", "type"))              
+
+normal_raw <-
+   read.delim("GSM1697009_06_01_15_TCGA_24.normal_Rsubread_FeatureCounts.txt", 
+                 header=TRUE, row.names=1)
+colnames(normal_raw) = gsub("\\.","-",colnames(normal_raw))
+idx_normal = match(NormalCancerType[,1], colnames(normal_raw))
+normal_raw = normal_raw[,idx_normal]
+
+## step 5 - make the se for the normal samples
+
+se_normal <- SummarizedExperiment(assays=data.matrix(normal_raw), 
+   colData = S4Vectors::DataFrame(NormalCancerType)) 
+save(se_normal, 
+   file="GSE62944_GSM1536837_TCGA_24.tumor_Rsubread_FeatureCounts.SE.Rda")
+
+

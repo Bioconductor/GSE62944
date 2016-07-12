@@ -10,7 +10,7 @@
   samples across 24 cancer types and made it available as GEO
   accession 
   [GSE62944](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE62944).
-  These data have been parsed into an \code{ExpressionSet} object and
+  These data have been parsed into a \code{SummazrixedExperiment object and
   are available in \code{ExperimentHub}.
 }
 
@@ -27,11 +27,14 @@
 \examples{
 library(ExperimentHub)
 hub <- ExperimentHub()
-x <- query(hub, "GSE62944")
+x <- query(hub, "GSE62944", "se", "tumor")
 x
+y <- query(hub, "GSE62944" "se", "normal")
+y
 \dontrun{
 ## download resource
-x[[1]]
+se_tumor = x[[1]]
+se_normal = y[[1]]
 }}
 
 \keyword{utilities}
