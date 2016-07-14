@@ -10,7 +10,7 @@
   samples across 24 cancer types and made it available as GEO
   accession 
   [GSE62944](http://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE62944).
-  These data have been parsed into a \code{SummazrixedExperiment object and
+  These data have been parsed into a \code{SummarizedExperiment} objects and
   are available in \code{ExperimentHub}.
 }
 
