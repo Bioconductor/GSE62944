@@ -27,9 +27,9 @@
 \examples{
 library(ExperimentHub)
 hub <- ExperimentHub()
-x <- query(hub, "GSE62944", "se", "tumor")
+x <- query(hub, c("GSE62944", "tumor"))
 x
-y <- query(hub, "GSE62944" "se", "normal")
+y <- query(hub, c("GSE62944", "normal"))
 y
 \dontrun{
 ## download resource
