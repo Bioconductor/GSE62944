@@ -135,10 +135,10 @@ if(!identical(colnames(cancer_raw), rownames(clinvar)))
    
 ## step 3 - make the se for the tumor samples
 
-se_tumor <- SummarizedExperiment(assays=data.matrix(cancer_raw), 
+se_tumor <- SummarizedExperiment(assays=SimpleList(CancerRaw=data.matrix(cancer_raw)), 
    colData = S4Vectors::DataFrame(clinvar)) 
-save(se_tumor
-   file="GSE62944_GSM1536837_TCGA_24.tumor_Rsubread_FeatureCounts.SE.Rda")
+save(se_tumor,
+   file="GSE62944_GSM1536837_TCGA_24.tumor_Rsubread_FeatureCounts.SE.V2.Rda")
 
 ## step 4 -read in normal samples
 NormalCancerType <-
@@ -155,9 +155,9 @@ normal_raw = normal_raw[,idx_normal]
 
 ## step 5 - make the se for the normal samples
 
-se_normal <- SummarizedExperiment(assays=data.matrix(normal_raw), 
+se_normal <- SummarizedExperiment(assays=SimpleList(NormalRaw=data.matrix(normal_raw)), 
    colData = S4Vectors::DataFrame(NormalCancerType)) 
 save(se_normal, 
-   file="GSE62944_GSM1536837_TCGA_24.tumor_Rsubread_FeatureCounts.SE.Rda")
+   file="GSE62944_GSM1697009_TCGA_24.normal_Rsubread_FeatureCounts.SE.V2.Rda")
 
 
